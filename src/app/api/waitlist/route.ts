@@ -82,9 +82,106 @@ export async function POST(request: Request) {
         // from: "Framp <noreply@framp.xyz>",
         to: email,
         subject: "Confirm your Framp waitlist signup",
-        html: `<p>Hey${name ? ` ${name}` : ""}!</p>
-              <p>Thanks for signing up for Framp. Please <a href="${confirmUrl}">click here to confirm</a> your email.</p>
-              <p>Let's supercharge TradFi together!</p>`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Confirm your Framp waitlist signup</title>
+            <style>
+              body {
+                font-family: 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                margin: 0;
+                padding: 0;
+                background-color: #f9f9f9;
+              }
+              .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+              }
+              .email-header {
+                background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+                padding: 30px 20px;
+                text-align: center;
+              }
+              .email-header img {
+                max-width: 120px;
+                display: inline-block;
+              }
+              .email-body {
+                padding: 30px;
+                background-color: #ffffff;
+              }
+              .email-footer {
+                background-color: #f4f4f7;
+                padding: 20px;
+                text-align: center;
+                font-size: 12px;
+                color: #71717a;
+              }
+              h1 {
+                color: #111827;
+                font-size: 24px;
+                margin-top: 0;
+                margin-bottom: 20px;
+              }
+              p {
+                margin-bottom: 20px;
+                color: #4b5563;
+              }
+              .button {
+                display: inline-block;
+                background-color: #4F46E5;
+                color: #ffffff !important;
+                text-decoration: none;
+                padding: 12px 30px;
+                border-radius: 6px;
+                font-weight: 600;
+                margin: 20px 0;
+                text-align: center;
+                transition: background-color 0.3s;
+              }
+              .button:hover {
+                background-color: #4338CA;
+              }
+              .highlight {
+                color: #4F46E5;
+                font-weight: bold;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="email-container">
+              <div class="email-header">
+                <h2 style="color: white; margin: 0; font-size: 28px;">Framp</h2>
+              </div>
+              <div class="email-body">
+                <h1>Welcome to Framp${name ? `, ${name}` : ''}!</h1>
+                <p>Thank you for joining our waitlist. We're building the next generation of financial tools to <span class="highlight">supercharge TradFi</span>.</p>
+                <p>To confirm your spot on our waitlist, please click the button below:</p>
+                <div style="text-align: center;">
+                  <a href="${confirmUrl}" class="button">Confirm My Spot</a>
+                </div>
+                <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
+                <p style="font-size: 13px; word-break: break-all; background-color: #f9fafb; padding: 10px; border-radius: 4px;">${confirmUrl}</p>
+                <p>We're excited to have you on board!</p>
+                <p>Best regards,<br>The Framp Team</p>
+              </div>
+              <div class="email-footer">
+                <p> ${new Date().getFullYear()} Framp. All rights reserved.</p>
+                <p>If you didn't sign up for Framp, please ignore this email.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
       });
     } catch (emailError) {
       console.error("Failed to send confirmation email", emailError);
