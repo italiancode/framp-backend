@@ -6,16 +6,31 @@ import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+// Initialize services only when function is called
+const getResend = () => {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  
+  if (!resendApiKey) {
+    throw new Error('Resend API key must be provided');
+  }
+  
+  return new Resend(resendApiKey);
+};
 
 function generateToken(email: string) {
   return crypto.createHash("sha256").update(email).digest("hex");
 }
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const getSupabase = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase URL and key must be provided');
+  }
+  
+  return createClient(supabaseUrl, supabaseKey);
+};
 
 export async function POST(request: Request) {
   try {
@@ -34,6 +49,7 @@ export async function POST(request: Request) {
     const ip_address = headersList.get("x-forwarded-for") || null;
     const user_agent = headersList.get("user-agent") || null;
 
+    const supabase = getSupabase();
     const { data, error } = await supabase.from("waitlist").insert([
       {
         email,
@@ -60,6 +76,7 @@ export async function POST(request: Request) {
       const token = generateToken(email);
       const confirmUrl = `${process.env.NEXT_PUBLIC_FRAMP_BASE_URL}/api/confirm?token=${token}`;
 
+      const resend = getResend();
       await resend.emails.send({
         from: "Framp <hello@framp.xyz>",
         // from: "Framp <noreply@framp.xyz>",
