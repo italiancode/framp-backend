@@ -101,19 +101,22 @@ export async function POST(request: Request) {
               .email-container {
                 max-width: 600px;
                 margin: 0 auto;
-                background-color: #ffffff;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 border-radius: 8px;
                 overflow: hidden;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
               }
               .email-header {
-                background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
-                padding: 30px 20px;
-                text-align: center;
+                width: 100%;
+                padding: 0;
+                margin: 0;
+                line-height: 0;
               }
               .email-header img {
-                max-width: 120px;
-                display: inline-block;
+                width: 100%;
+                display: block;
+                margin: 0;
+                padding: 0;
               }
               .email-body {
                 padding: 30px;
@@ -160,7 +163,7 @@ export async function POST(request: Request) {
           <body>
             <div class="email-container">
               <div class="email-header">
-                <h2 style="color: white; margin: 0; font-size: 28px;">Framp</h2>
+                <img src="${process.env.NEXT_PUBLIC_FRAMP_BASE_URL}/framp_cover.jpg" alt="Framp">
               </div>
               <div class="email-body">
                 <h1>Welcome to Framp${name ? `, ${name}` : ''}!</h1>
