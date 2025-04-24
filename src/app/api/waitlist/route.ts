@@ -114,6 +114,10 @@ export async function POST(request: Request) {
                 line-height: 0;
                 max-height: 120px;
                 overflow: hidden;
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
               }
               .email-header img {
                 width: 100%;
@@ -122,6 +126,7 @@ export async function POST(request: Request) {
                 padding: 0;
                 object-fit: cover;
                 object-position: center;
+                transform: scale(1.1);
               }
               .email-body {
                 padding: 24px;
@@ -131,7 +136,7 @@ export async function POST(request: Request) {
               .button {
                 display: inline-block;
                 padding: 12px 24px;
-                background-color: #6366F1;
+                background-color: #3B82F6;
                 color: white;
                 text-decoration: none;
                 border-radius: 4px;
@@ -142,7 +147,7 @@ export async function POST(request: Request) {
                 text-align: center;
               }
               .highlight {
-                color: #6366F1;
+                color: #3B82F6;
                 font-weight: bold;
               }
               h1 {
@@ -173,13 +178,14 @@ export async function POST(request: Request) {
                 word-break: break-all;
                 color: #4B5563;
                 margin-bottom: 16px;
+                border: 1px solid #E5E7EB;
               }
             </style>
           </head>
           <body>
             <div class="email-container">
               <div class="email-header">
-                <img src="${process.env.NEXT_PUBLIC_FRAMP_BASE_URL}/framp_cover.jpg" alt="Framp">
+                <img src="${process.env.NEXT_PUBLIC_FRAMP_BASE_URL}/framp_cover.jpg" alt="Framp" style="transform: scale(1.1);">
               </div>
               <div class="email-body">
                 <h1>Welcome to Framp${name ? `, ${name}` : ''}</h1>
