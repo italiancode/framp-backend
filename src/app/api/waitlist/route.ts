@@ -91,7 +91,7 @@ export async function POST(request: Request) {
             <title>Confirm your Framp waitlist signup</title>
             <style>
               body {
-                font-family: 'Helvetica Neue', Arial, sans-serif;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 line-height: 1.6;
                 color: #333;
                 margin: 0;
@@ -101,62 +101,78 @@ export async function POST(request: Request) {
               .email-container {
                 max-width: 600px;
                 margin: 0 auto;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                border-radius: 8px;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                border-radius: 6px;
                 overflow: hidden;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+                background-color: #FFFFFF;
               }
               .email-header {
                 width: 100%;
                 padding: 0;
                 margin: 0;
                 line-height: 0;
+                max-height: 120px;
+                overflow: hidden;
               }
               .email-header img {
                 width: 100%;
                 display: block;
                 margin: 0;
                 padding: 0;
+                object-fit: cover;
+                object-position: center;
               }
               .email-body {
-                padding: 30px;
-                background-color: #ffffff;
-              }
-              .email-footer {
-                background-color: #f4f4f7;
-                padding: 20px;
-                text-align: center;
-                font-size: 12px;
-                color: #71717a;
-              }
-              h1 {
-                color: #111827;
-                font-size: 24px;
-                margin-top: 0;
-                margin-bottom: 20px;
-              }
-              p {
-                margin-bottom: 20px;
-                color: #4b5563;
+                padding: 24px;
+                background-color: #FFFFFF;
+                color: #1F2937;
               }
               .button {
                 display: inline-block;
-                background-color: #4F46E5;
-                color: #ffffff !important;
+                padding: 12px 24px;
+                background-color: #6366F1;
+                color: white;
                 text-decoration: none;
-                padding: 12px 30px;
-                border-radius: 6px;
-                font-weight: 600;
-                margin: 20px 0;
+                border-radius: 4px;
+                font-weight: 500;
+                margin: 16px 0;
+                font-size: 14px;
+                border: none;
                 text-align: center;
-                transition: background-color 0.3s;
-              }
-              .button:hover {
-                background-color: #4338CA;
               }
               .highlight {
-                color: #4F46E5;
+                color: #6366F1;
                 font-weight: bold;
+              }
+              h1 {
+                font-size: 20px;
+                margin-top: 0;
+                margin-bottom: 16px;
+                color: #111827;
+                font-weight: 600;
+              }
+              p {
+                margin-bottom: 16px;
+                font-size: 14px;
+                color: #4B5563;
+              }
+              .email-footer {
+                background-color: #F9FAFB;
+                padding: 16px;
+                text-align: center;
+                font-size: 12px;
+                color: #6B7280;
+                border-top: 1px solid #E5E7EB;
+              }
+              .link-box {
+                background-color: #F3F4F6;
+                padding: 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                word-break: break-all;
+                color: #4B5563;
+                margin-bottom: 16px;
               }
             </style>
           </head>
@@ -166,20 +182,18 @@ export async function POST(request: Request) {
                 <img src="${process.env.NEXT_PUBLIC_FRAMP_BASE_URL}/framp_cover.jpg" alt="Framp">
               </div>
               <div class="email-body">
-                <h1>Welcome to Framp${name ? `, ${name}` : ''}!</h1>
-                <p>Thank you for joining our waitlist. We're building the next generation of financial tools to <span class="highlight">supercharge TradFi</span>.</p>
-                <p>To confirm your spot on our waitlist, please click the button below:</p>
+                <h1>Welcome to Framp${name ? `, ${name}` : ''}</h1>
+                <p>Thank you for joining our waitlist. We're building advanced financial tools to <span class="highlight">supercharge your investments</span>.</p>
+                <p>Please confirm your spot on our waitlist:</p>
                 <div style="text-align: center;">
                   <a href="${confirmUrl}" class="button">Confirm My Spot</a>
                 </div>
-                <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
-                <p style="font-size: 13px; word-break: break-all; background-color: #f9fafb; padding: 10px; border-radius: 4px;">${confirmUrl}</p>
-                <p>We're excited to have you on board!</p>
-                <p>Best regards,<br>The Framp Team</p>
+                <p>Or copy this link:</p>
+                <div class="link-box">${confirmUrl}</div>
+                <p>The Framp Team</p>
               </div>
               <div class="email-footer">
-                <p> ${new Date().getFullYear()} Framp. All rights reserved.</p>
-                <p>If you didn't sign up for Framp, please ignore this email.</p>
+                <p style="margin: 0;">${new Date().getFullYear()} Framp · All rights reserved</p>
               </div>
             </div>
           </body>
