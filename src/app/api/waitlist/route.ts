@@ -81,7 +81,7 @@ export async function POST(request: Request) {
         to: email,
         subject: "Confirm your Framp waitlist signup",
         html: `
-         <!doctype html>
+        <!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -89,15 +89,6 @@ export async function POST(request: Request) {
     <title>Confirm your Framp waitlist signup</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-
-      :root {
-        --framp-dark: #1e1d2f;
-        --framp-white: #f6f6f6;
-        --framp-gray-100: #e5e7eb;
-        --framp-gray-200: #d1d5db;
-        --framp-gray-300: #9ca3af;
-        --framp-primary: #6366f1;
-      }
 
       body {
         font-family:
@@ -110,7 +101,7 @@ export async function POST(request: Request) {
         line-height: 1.6;
         margin: 0;
         padding: 0;
-        background-color: #f9f9f9;
+        background-color: #fff;
         color: #1e1d2f;
       }
 
@@ -126,8 +117,6 @@ export async function POST(request: Request) {
         border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-        background-color: #f6f6f6;
-        border: 1px solid #d1d5db;
       }
 
       .email-body {
@@ -288,7 +277,6 @@ export async function POST(request: Request) {
     </div>
   </body>
 </html>
-
         `,
       });
     } catch (emailError) {
