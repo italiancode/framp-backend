@@ -63,6 +63,15 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error(error);
+      
+      // Check for duplicate email error (PostgreSQL unique constraint violation)
+      if (error.code === '23505' && error.message.includes('email')) {
+        return NextResponse.json(
+          { error: "This email is already on our waitlist." },
+          { status: 400 }
+        );
+      }
+      
       return NextResponse.json(
         { error: "Failed to save waitlist data" },
         { status: 500 }

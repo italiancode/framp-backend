@@ -22,8 +22,11 @@ export const signUpWaitlist = async ({ email, name, wallet, referral }: Waitlist
       body: JSON.stringify({ email, name, wallet, referral }),
     });
 
+    const data = await res.json();
+    
     if (!res.ok) {
-      throw new Error('Failed to sign up.');
+      // Extract specific error message from the API response
+      throw new Error(data.error || 'Failed to sign up.');
     }
     
     return { success: true, error: null };
