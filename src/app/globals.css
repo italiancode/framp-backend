@@ -19,3 +19,24 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* You can add this in a global CSS file or Tailwind's custom classes */
+.admin-dashboard table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-dashboard table th, .admin-dashboard table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+}
+
+.admin-dashboard table th {
+  background-color: #f0f0f0;
+  text-align: left;
+}
+
+.admin-dashboard button {
+  margin-top: 8px;
+}
+
