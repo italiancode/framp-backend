@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Hexagon, ArrowRight, CheckCircle } from "lucide-react";
 import { signUpWaitlist } from "../hooks/useWaitlist";
 
-export default function Home() {
+export default function WaitlistForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
