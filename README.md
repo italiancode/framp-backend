@@ -4,7 +4,9 @@
 
 ## Overview
 
-FRAMP (short for Ramp Finance) is revolutionizing how users interact with crypto and fiat currencies. We provide seamless on/off ramping services that bridge the gap between digital assets and real-world needs.
+FRAMP (short for Ramp Finance) is a Solana-based platform that simplifies how users interact with crypto and fiat. We provide seamless on/off ramping services that bridge the gap between digital assets and real-world needs.
+
+With FRAMP, anyone can instantly convert crypto to cash (or vice versa), pay utility bills straight from their wallet, and automatically save a portion of each transaction. We’re building the financial bridge between Web3 and everyday life, with a focus on speed, accessibility, and real-world utility.
 
 ### Key Features
 
