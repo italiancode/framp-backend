@@ -1,6 +1,6 @@
 # FRAMP - Your TurboCharged Finance Buddy
 
-![FRAMP Logo](/public/frampapplogo.webp)
+![FRAMP Logo](/public/framp_cover.jpg)
 
 ## Overview
 
