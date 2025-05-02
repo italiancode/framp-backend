@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FRAMP - Your TurboCharged Finance Buddy
+
+![FRAMP Logo](/public/frampapplogo.webp)
+
+## Overview
+
+FRAMP (short for Ramp Finance) is revolutionizing how users interact with crypto and fiat currencies. We provide seamless on/off ramping services that bridge the gap between digital assets and real-world needs.
+
+### Key Features
+
+- **Simplified On/Off Ramping**: Easily convert between crypto and fiat currencies
+- **Direct Bill Payments**: Pay electricity, data, and internet bills directly from your wallet
+- **Automated Savings**: After each transaction, a percentage is automatically saved from your remaining balance
+- **Solana-Powered**: Built on the Solana blockchain for fast, low-cost transactions
+
+## Our Mission
+
+FRAMP is committed to supercharging traditional finance with Solana, making ramping technology seamless, and promoting crypto adoption worldwide.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js 18.x or higher
+- npm or yarn
+- Git
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/italiancode/framp-backend.git
+   cd framp-backend
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-## Learn More
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+   Then edit the `.env` file with your own values.
 
-To learn more about Next.js, take a look at the following resources:
+4. Run the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Environment Variables
 
-## Deploy on Vercel
+Required environment variables are documented in `.env.example`. Make sure to set these up before running the application.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+We welcome contributions from the community! Please read our contributing guidelines before submitting pull requests.
+
+## License
+
+[MIT License](LICENSE)
+
+## Contact
+
+- Website: [https://framp.xyz](https://framp.xyz)
+- Twitter: [@frampHQ](https://twitter.com/frampHQ)
+- Telegram: [FrampHQ](https://t.me/FrampHQ)
+
+---
+
+FRAMP - Making digital finance accessible to everyone 
