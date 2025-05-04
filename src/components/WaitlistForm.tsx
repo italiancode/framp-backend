@@ -118,7 +118,7 @@ export default function WaitlistForm() {
 
             {/* Telegram Icon */}
             <a
-              href="https://t.me/FrampHQ"
+              href="https://t.me/Framp_HQ"
               target="_blank"
               rel="noopener noreferrer"
               className="text-white hover:text-purple-400 transition-colors"
