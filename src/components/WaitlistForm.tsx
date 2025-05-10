@@ -166,14 +166,14 @@ export default function WaitlistForm() {
                 </p>
 
                 <div className="relative">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email address"
                     className="w-full px-4 py-3 bg-gray-800/70 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
-                    required
-                  />
+              required
+            />
                 </div>
 
                 {error && <div className="text-red-400 text-sm">{error}</div>}
@@ -455,7 +455,7 @@ export default function WaitlistForm() {
           <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
             <p>© {new Date().getFullYear()} FRAMP. All rights reserved.</p>
           </div>
-        </div>
+    </div>
       </footer> */}
     </main>
   );

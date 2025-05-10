@@ -1,50 +1,41 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import type { Metadata } from "next";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { Geist, Geist_Mono } from "next/font/google";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
   subsets: ["latin"],
+  variable: "--font-geist-sans",
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
+  variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
-  title: "Framp | Finance Reimagined",
-  description:
-    "On/Off ramping, bill payments, and smart savings—all from your wallet.",
+  title: "FRAMP | Your TurboCharged Finance Buddy",
+  description: "FRAMP makes it easy to convert between crypto and fiat, pay bills from your wallet, and automate savings with Solana.",
   metadataBase: new URL("https://framp.xyz"),
   openGraph: {
-    title: "Framp | Finance Reimagined",
-    description:
-      "On/Off ramping, bill payments, and smart savings—all from your wallet.",
+    title: "FRAMP | Your TurboCharged Finance Buddy",
+    description: "Instantly convert crypto to cash, pay utility bills, and automate savings with Solana.",
     url: "https://framp.xyz",
     siteName: "Framp",
-    images: [
-      {
-        url: "/og-image.png", // place this image in public/
-        width: 1200,
-        height: 630,
-        alt: "Framp Open Graph Image",
-      },
-    ],
+    images: ["/framp_cover.jpg"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Framp | Finance Reimagined",
-    description:
-      "On/Off ramping, bill payments, and smart savings—all from your wallet.",
-    images: ["/og-image.png"],
+    title: "FRAMP | Your TurboCharged Finance Buddy",
+    description: "Instantly convert crypto to cash, pay utility bills, and automate savings with Solana.",
+    images: ["/framp_cover.jpg"],
+    creator: "@frampHQ",
   },
   icons: {
     icon: "/favicon.ico",
   },
-
-  themeColor: "#4F46E5",
 };
 
 export default function RootLayout({
@@ -53,11 +44,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
-        {children}
+        <ThemeProvider 
+          attribute="class" 
+          defaultTheme="system" 
+          enableSystem 
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
