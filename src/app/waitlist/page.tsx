@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import WaitlistForm from "@/components/WaitlistForm";
+import Layout from "@/components/layout/Layout";
 
 export const metadata: Metadata = {
   title: "Join the FRAMP Waitlist | Your TurboCharged Finance Buddy",
@@ -35,5 +36,9 @@ export const metadata: Metadata = {
 };
 
 export default function WaitlistPage() {
-  return <WaitlistForm />;
+  return (
+    <Layout>
+      <WaitlistForm />
+    </Layout>
+  );
 }
