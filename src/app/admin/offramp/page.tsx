@@ -1,6 +1,18 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import Layout from "@/components/layout/Layout"
+import { BackgroundElements } from "@/components/ui/BackgroundElements"
+import {
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  RefreshCw,
+  Download,
+  Search,
+  Eye,
+} from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { formatDistanceToNow } from "date-fns"
 
@@ -26,6 +38,7 @@ interface OfframpRequest {
 }
 
 export default function AdminOfframpPage() {
+  const router = useRouter()
   const [requests, setRequests] = useState<OfframpRequest[]>([])
   const [filteredRequests, setFilteredRequests] = useState<OfframpRequest[]>([])
   const [loading, setLoading] = useState<boolean>(false)
@@ -175,21 +188,6 @@ export default function AdminOfframpPage() {
     return `${date.toLocaleDateString()} (${formatDistanceToNow(date, { addSuffix: true })})`
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "confirmed":
-        return "bg-green-100 text-green-800 border-green-200"
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
-      case "failed":
-        return "bg-red-100 text-red-800 border-red-200"
-      case "disbursed":
-        return "bg-green-100 text-green-800 border-green-200"
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
-    }
-  }
-
   const exportToCSV = () => {
     const headers = [
       "User Name",
@@ -250,371 +248,550 @@ export default function AdminOfframpPage() {
   const stats = getRequestStats()
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
-      <div className="flex flex-col space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Offramp Requests</h1>
-            <p className="text-gray-500 mt-1">Manage and process user offramp requests</p>
-          </div>
-          <div className="flex items-center gap-2 self-end md:self-auto">
-            <button
-              onClick={exportToCSV}
-              className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
-              Export
-            </button>
-            <button
-              onClick={fetchOfframpRequests}
-              disabled={loading}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              Refresh
-            </button>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <p className="text-sm font-medium text-gray-500">Total Requests</p>
-            <p className="text-2xl font-bold mt-1">{stats.total}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <p className="text-sm font-medium text-gray-500">Pending</p>
-            <p className="text-2xl font-bold mt-1 text-yellow-600">{stats.pending}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <p className="text-sm font-medium text-gray-500">Disbursed</p>
-            <p className="text-2xl font-bold mt-1 text-green-600">{stats.disbursed}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <p className="text-sm font-medium text-gray-500">Failed</p>
-            <p className="text-2xl font-bold mt-1 text-red-600">{stats.failed}</p>
-          </div>
-        </div>
-
-        {/* Search and Filters */}
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-          <div className="relative w-full md:w-72">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-            <input
-              type="search"
-              placeholder="Search requests..."
-              className="pl-8 w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <div className="relative">
-              <button
-                onClick={() => setFilterMenuOpen(!filterMenuOpen)}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors w-full md:w-auto"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                  />
-                </svg>
-                Filter
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {filterMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-100">
-                  <div className="py-1">
-                    <button
-                      onClick={() => {
-                        setStatusFilter("all")
-                        setFilterMenuOpen(false)
-                      }}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      All Requests
-                    </button>
-                    <button
-                      onClick={() => {
-                        setStatusFilter("pending_all")
-                        setFilterMenuOpen(false)
-                      }}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      All Pending
-                    </button>
-                    <button
-                      onClick={() => {
-                        setStatusFilter("pending")
-                        setFilterMenuOpen(false)
-                      }}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      Pending Status
-                    </button>
-                    <button
-                      onClick={() => {
-                        setStatusFilter("confirmed")
-                        setFilterMenuOpen(false)
-                      }}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      Confirmed Status
-                    </button>
-                    <button
-                      onClick={() => {
-                        setStatusFilter("failed")
-                        setFilterMenuOpen(false)
-                      }}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      Failed Status
-                    </button>
-                    <button
-                      onClick={() => {
-                        setStatusFilter("disbursed")
-                        setFilterMenuOpen(false)
-                      }}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      Disbursed
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            <button
-              onClick={exportToCSV}
-              className="md:hidden flex items-center justify-center p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* View Tabs */}
-        <div className="flex border-b border-gray-200">
-          <button
-            onClick={() => setActiveView("table")}
-            className={`px-4 py-2 text-sm font-medium ${
-              activeView === "table"
-                ? "border-b-2 border-indigo-500 text-indigo-600"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            Table View
-          </button>
-          <button
-            onClick={() => setActiveView("cards")}
-            className={`px-4 py-2 text-sm font-medium ${
-              activeView === "cards"
-                ? "border-b-2 border-indigo-500 text-indigo-600"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            Card View
-          </button>
-        </div>
-
-        {/* Table View */}
-        {activeView === "table" && (
-          <div className="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
-            {loading ? (
-              <div className="p-6 space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex flex-col space-y-3">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                  </div>
-                ))}
-              </div>
-            ) : filteredRequests.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10 text-gray-400 mb-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <h3 className="text-lg font-medium">No requests found</h3>
-                <p className="text-gray-500 mt-1">
-                  {requests.length > 0
-                    ? "Try adjusting your search or filter criteria"
-                    : "No offramp requests available at the moment"}
+    <Layout>
+      <div className="relative min-h-screen bg-white dark:bg-background py-6 px-4 sm:px-6 lg:px-8">
+        <BackgroundElements />
+        
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="flex flex-col space-y-6">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-black dark:text-white">
+                  Offramp Requests
+                </h1>
+                <p className="text-sm text-black/70 dark:text-white/70 mt-1">
+                  Manage and process user offramp requests
                 </p>
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        User
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Conversion
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Bank Details
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Status
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Disbursement
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+              <div className="flex items-center gap-3 self-end md:self-auto">
+                <button
+                  onClick={() => router.push("/admin")}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-background/50 backdrop-blur-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                >
+                  Waitlist Management
+                </button>
+                <button
+                  onClick={() => router.push("/admin/offramp")}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-background/50 backdrop-blur-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                >
+                  Off-Ramp Management
+                </button>
+              </div>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-white dark:bg-background/50 backdrop-blur-md rounded-xl border border-black/10 dark:border-white/10 shadow-sm p-4">
+                <p className="text-sm font-medium text-black/60 dark:text-white/60">
+                  Total Requests
+                </p>
+                <p className="text-2xl font-bold text-black dark:text-white mt-1">
+                  {stats.total}
+                </p>
+              </div>
+              <div className="bg-white dark:bg-background/50 backdrop-blur-md rounded-xl border border-black/10 dark:border-white/10 shadow-sm p-4">
+                <p className="text-sm font-medium text-black/60 dark:text-white/60">
+                  Pending
+                </p>
+                <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">
+                  {stats.pending}
+                </p>
+              </div>
+              <div className="bg-white dark:bg-background/50 backdrop-blur-md rounded-xl border border-black/10 dark:border-white/10 shadow-sm p-4">
+                <p className="text-sm font-medium text-black/60 dark:text-white/60">
+                  Disbursed
+                </p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
+                  {stats.disbursed}
+                </p>
+              </div>
+              <div className="bg-white dark:bg-background/50 backdrop-blur-md rounded-xl border border-black/10 dark:border-white/10 shadow-sm p-4">
+                <p className="text-sm font-medium text-black/60 dark:text-white/60">
+                  Failed
+                </p>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">
+                  {stats.failed}
+                </p>
+              </div>
+            </div>
+
+            {/* Search and Filters */}
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
+              <div className="relative w-full md:w-72">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search size={16} className="text-black/50 dark:text-white/50" />
+                </div>
+                <input
+                  type="search"
+                  placeholder="Search requests..."
+                  className="pl-10 w-full py-2 px-3 border border-black/20 dark:border-white/20 rounded-lg bg-white dark:bg-black/30 text-black dark:text-white placeholder-black/50 dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7b77b9]"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                <div className="relative">
+                  <button
+                    onClick={() => setFilterMenuOpen(!filterMenuOpen)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-black/20 dark:border-white/20 bg-white dark:bg-black/30 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors w-full md:w-auto"
+                  >
+                    <Filter size={16} />
+                    Filter
+                    {filterMenuOpen ? (
+                      <ChevronUp size={16} />
+                    ) : (
+                      <ChevronDown size={16} />
+                    )}
+                  </button>
+                  {filterMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-background rounded-md shadow-lg z-10 border border-black/10 dark:border-white/10">
+                      <div className="py-1">
+                        <button
+                          onClick={() => {
+                            setStatusFilter("all")
+                            setFilterMenuOpen(false)
+                          }}
+                          className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 w-full text-left"
+                        >
+                          All Requests
+                        </button>
+                        <button
+                          onClick={() => {
+                            setStatusFilter("pending_all")
+                            setFilterMenuOpen(false)
+                          }}
+                          className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 w-full text-left"
+                        >
+                          All Pending
+                        </button>
+                        <button
+                          onClick={() => {
+                            setStatusFilter("pending")
+                            setFilterMenuOpen(false)
+                          }}
+                          className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 w-full text-left"
+                        >
+                          Pending Status
+                        </button>
+                        <button
+                          onClick={() => {
+                            setStatusFilter("confirmed")
+                            setFilterMenuOpen(false)
+                          }}
+                          className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 w-full text-left"
+                        >
+                          Confirmed Status
+                        </button>
+                        <button
+                          onClick={() => {
+                            setStatusFilter("failed")
+                            setFilterMenuOpen(false)
+                          }}
+                          className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 w-full text-left"
+                        >
+                          Failed Status
+                        </button>
+                        <button
+                          onClick={() => {
+                            setStatusFilter("disbursed")
+                            setFilterMenuOpen(false)
+                          }}
+                          className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 w-full text-left"
+                        >
+                          Disbursed
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={exportToCSV}
+                  className="md:flex hidden items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-black/20 dark:border-white/20 bg-white dark:bg-black/30 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                >
+                  <Download size={16} /> Export
+                </button>
+                <button
+                  onClick={fetchOfframpRequests}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-black/20 dark:border-white/20 bg-white dark:bg-black/30 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                  disabled={loading}
+                >
+                  <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Refresh
+                </button>
+                <button
+                  onClick={exportToCSV}
+                  className="md:hidden flex items-center p-2 rounded-lg border border-black/20 dark:border-white/20 bg-white dark:bg-black/30 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  <Download size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* View Tabs */}
+            <div className="flex border-b border-black/10 dark:border-white/10 mb-6">
+              <button
+                onClick={() => setActiveView("table")}
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeView === "table"
+                    ? "border-b-2 border-[#7b77b9] text-[#7b77b9] dark:text-[#a5a1ff]"
+                    : "text-black/70 dark:text-white/70 hover:text-black hover:dark:text-white"
+                }`}
+              >
+                Table View
+              </button>
+              <button
+                onClick={() => setActiveView("cards")}
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeView === "cards"
+                    ? "border-b-2 border-[#7b77b9] text-[#7b77b9] dark:text-[#a5a1ff]"
+                    : "text-black/70 dark:text-white/70 hover:text-black hover:dark:text-white"
+                }`}
+              >
+                Card View
+              </button>
+            </div>
+
+            {/* Table View */}
+            {activeView === "table" && (
+              <div className="bg-white dark:bg-background/50 backdrop-blur-md rounded-xl border border-black/10 dark:border-white/10 shadow-sm overflow-hidden">
+                {loading ? (
+                  <div className="p-6 space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex flex-col space-y-3">
+                        <div className="h-4 bg-black/10 dark:bg-white/10 rounded animate-pulse w-full"></div>
+                        <div className="h-4 bg-black/10 dark:bg-white/10 rounded animate-pulse w-3/4"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : filteredRequests.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-8 text-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-black/40 dark:text-white/40 mb-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <h3 className="text-lg font-medium text-black dark:text-white">No requests found</h3>
+                    <p className="text-black/70 dark:text-white/70 mt-1">
+                      {requests.length > 0
+                        ? "Try adjusting your search or filter criteria"
+                        : "No offramp requests available at the moment"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-black/10 dark:divide-white/10">
+                      <thead className="bg-black/5 dark:bg-white/5">
+                        <tr>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-black/70 dark:text-white/70 uppercase tracking-wider"
+                          >
+                            User
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-black/70 dark:text-white/70 uppercase tracking-wider"
+                          >
+                            Conversion
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-black/70 dark:text-white/70 uppercase tracking-wider"
+                          >
+                            Bank Details
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-black/70 dark:text-white/70 uppercase tracking-wider"
+                          >
+                            Status
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-black/70 dark:text-white/70 uppercase tracking-wider"
+                          >
+                            Disbursement
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-right text-xs font-medium text-black/70 dark:text-white/70 uppercase tracking-wider"
+                          >
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-transparent divide-y divide-black/10 dark:divide-white/10">
+                        {filteredRequests.map((request) => (
+                          <tr key={request.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex flex-col">
+                                <div className="text-sm font-medium text-black dark:text-white">{request.user_name}</div>
+                                <div className="text-sm text-black/70 dark:text-white/70">{request.user_email}</div>
+                                <div className="text-xs text-black/50 dark:text-white/50 mt-1 truncate max-w-[200px]">
+                                  {request.user_wallet}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-2">
+                                <div className="bg-black/5 dark:bg-white/5 px-2 py-1 rounded text-sm text-black dark:text-white">
+                                  {request.amount.toLocaleString()} {request.token}
+                                </div>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4 text-black/40 dark:text-white/40"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth={2}
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                                  />
+                                </svg>
+                                <div className="bg-black/5 dark:bg-white/5 px-2 py-1 rounded text-sm text-black dark:text-white">
+                                  {request.fiat_amount.toLocaleString()} {request.fiat_currency}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex flex-col">
+                                <span className="text-black dark:text-white">{request.bank_name}</span>
+                                <span className="text-sm text-black/70 dark:text-white/70">
+                                  {request.bank_account_number} ({request.bank_code})
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex flex-col gap-1.5">
+                                <span
+                                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    request.status === "confirmed"
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                      : request.status === "pending"
+                                      ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                                      : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                                  }`}
+                                >
+                                  {request.status === "confirmed" && (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-3.5 w-3.5 mr-1"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                  )}
+                                  {request.status === "pending" && (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-3.5 w-3.5 mr-1"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                  )}
+                                  {request.status === "failed" && (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-3.5 w-3.5 mr-1"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                  )}
+                                  {request.status}
+                                </span>
+                                <span
+                                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    request.fiat_disbursement_status === "disbursed"
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                      : request.fiat_disbursement_status === "pending"
+                                      ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                                      : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                                  }`}
+                                >
+                                  {request.fiat_disbursement_status === "disbursed" && (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-3.5 w-3.5 mr-1"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                  )}
+                                  {request.fiat_disbursement_status === "pending" && (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-3.5 w-3.5 mr-1"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                  )}
+                                  {request.fiat_disbursement_status === "failed" && (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-3.5 w-3.5 mr-1"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                  )}
+                                  {request.fiat_disbursement_status}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-black dark:text-white">{formatDate(request.disbursed_at)}</div>
+                              {request.payout_reference && (
+                                <div className="text-xs text-black/60 dark:text-white/60">Ref: {request.payout_reference}</div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  onClick={() => openRequestDetails(request)}
+                                  className="inline-flex items-center px-3 py-1.5 border border-black/20 dark:border-white/20 text-sm font-medium rounded-lg text-black dark:text-white bg-white dark:bg-black/20 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                >
+                                  <Eye size={16} className="mr-1.5" />
+                                  Details
+                                </button>
+
+                                {request.fiat_disbursement_status === "pending" && (
+                                  <button
+                                    onClick={() => openRequestDetails(request)}
+                                    disabled={request.status !== "confirmed"}
+                                    className={`inline-flex items-center px-3 py-1.5 border rounded-lg text-sm font-medium ${
+                                      request.status !== "confirmed"
+                                        ? "border-black/20 dark:border-white/20 text-black/40 dark:text-white/40 bg-black/5 dark:bg-white/5 cursor-not-allowed"
+                                        : "border-[#7b77b9]/30 text-[#7b77b9] dark:text-[#a5a1ff] bg-[#7b77b9]/10 hover:bg-[#7b77b9]/20"
+                                    } transition-colors`}
+                                  >
+                                    {request.status !== "confirmed" ? "Payout Disabled" : "Trigger Payout"}
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Card View */}
+            {activeView === "cards" && (
+              <div>
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="bg-white dark:bg-background/50 backdrop-blur-md rounded-xl border border-black/10 dark:border-white/10 shadow-sm p-4">
+                        <div className="animate-pulse space-y-4">
+                          <div className="h-4 bg-black/10 dark:bg-white/10 rounded w-3/4"></div>
+                          <div className="h-3 bg-black/10 dark:bg-white/10 rounded w-1/2"></div>
+                          <div className="h-20 bg-black/10 dark:bg-white/10 rounded"></div>
+                          <div className="h-10 bg-black/10 dark:bg-white/10 rounded"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : filteredRequests.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-8 text-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-black/40 dark:text-white/40 mb-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <h3 className="text-lg font-medium text-black dark:text-white">No requests found</h3>
+                    <p className="text-black/70 dark:text-white/70 mt-1">
+                      {requests.length > 0
+                        ? "Try adjusting your search or filter criteria"
+                        : "No offramp requests available at the moment"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredRequests.map((request) => (
-                      <tr key={request.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex flex-col">
-                            <div className="text-sm font-medium text-gray-900">{request.user_name}</div>
-                            <div className="text-sm text-gray-500">{request.user_email}</div>
-                            <div className="text-xs text-gray-400 mt-1 truncate max-w-[200px]">
-                              {request.user_wallet}
+                      <div key={request.id} className="bg-white dark:bg-background/50 backdrop-blur-md rounded-xl border border-black/10 dark:border-white/10 shadow-sm overflow-hidden">
+                        <div className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-medium text-black dark:text-white">{request.user_name}</h3>
+                              <p className="text-sm text-black/70 dark:text-white/70">{request.user_email}</p>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <div className="bg-gray-100 px-2 py-1 rounded text-sm">
-                              {request.amount.toLocaleString()} {request.token}
-                            </div>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 text-gray-400"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                              />
-                            </svg>
-                            <div className="bg-gray-100 px-2 py-1 rounded text-sm">
-                              {request.fiat_amount.toLocaleString()} {request.fiat_currency}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex flex-col">
-                            <span>{request.bank_name}</span>
-                            <span className="text-sm text-gray-500">
-                              {request.bank_account_number} ({request.bank_code})
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex flex-col gap-1.5">
                             <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                request.status
-                              )}`}
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                request.status === "confirmed"
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                  : request.status === "pending"
+                                  ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                                  : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                              }`}
                             >
                               {request.status === "confirmed" && (
                                 <svg
@@ -666,343 +843,149 @@ export default function AdminOfframpPage() {
                               )}
                               {request.status}
                             </span>
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                request.fiat_disbursement_status
-                              )}`}
-                            >
-                              {request.fiat_disbursement_status === "disbursed" && (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-3.5 w-3.5 mr-1"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  strokeWidth={2}
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                  />
-                                </svg>
-                              )}
-                              {request.fiat_disbursement_status === "pending" && (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-3.5 w-3.5 mr-1"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  strokeWidth={2}
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                  />
-                                </svg>
-                              )}
-                              {request.fiat_disbursement_status === "failed" && (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-3.5 w-3.5 mr-1"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  strokeWidth={2}
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                  />
-                                </svg>
-                              )}
-                              {request.fiat_disbursement_status}
-                            </span>
                           </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm">{formatDate(request.disbursed_at)}</div>
-                          {request.payout_reference && (
-                            <div className="text-xs text-gray-500">Ref: {request.payout_reference}</div>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex justify-end gap-2">
+                        </div>
+
+                        <div className="px-4 py-3 space-y-4">
+                          <div className="flex flex-col space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-black/60 dark:text-white/60">Token Amount</span>
+                              <span className="font-medium text-black dark:text-white">
+                                {request.amount.toLocaleString()} {request.token}
+                              </span>
+                            </div>
+                            <div className="flex justify-center">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 text-black/40 dark:text-white/40 rotate-90 md:rotate-0"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                                />
+                              </svg>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-black/60 dark:text-white/60">Fiat Amount</span>
+                              <span className="font-medium text-black dark:text-white">
+                                {request.fiat_amount.toLocaleString()} {request.fiat_currency}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="bg-black/5 dark:bg-white/5 p-2 rounded-md">
+                              <p className="text-xs text-black/60 dark:text-white/60">Bank</p>
+                              <p className="font-medium truncate text-black dark:text-white">{request.bank_name}</p>
+                            </div>
+                            <div className="bg-black/5 dark:bg-white/5 p-2 rounded-md">
+                              <p className="text-xs text-black/60 dark:text-white/60">Account</p>
+                              <p className="font-medium truncate text-black dark:text-white">{request.bank_account_number}</p>
+                            </div>
+                          </div>
+
+                          <div className="bg-black/5 dark:bg-white/5 p-2 rounded-md">
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs text-black/60 dark:text-white/60">Disbursement Status</p>
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  request.fiat_disbursement_status === "disbursed"
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                    : request.fiat_disbursement_status === "pending"
+                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                                    : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                                }`}
+                              >
+                                {request.fiat_disbursement_status === "disbursed" && (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3.5 w-3.5 mr-1"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                )}
+                                {request.fiat_disbursement_status === "pending" && (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3.5 w-3.5 mr-1"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                )}
+                                {request.fiat_disbursement_status === "failed" && (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3.5 w-3.5 mr-1"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                )}
+                                {request.fiat_disbursement_status}
+                              </span>
+                            </div>
+                            <p className="text-xs mt-1">{formatDate(request.disbursed_at)}</p>
+                          </div>
+                        </div>
+
+                        <div className="px-4 pb-4 pt-2 flex justify-between">
+                          <button
+                            onClick={() => openRequestDetails(request)}
+                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                          >
+                            View Details
+                          </button>
+
+                          {request.fiat_disbursement_status === "pending" && (
                             <button
                               onClick={() => openRequestDetails(request)}
-                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                              disabled={request.status !== "confirmed"}
+                              className={`inline-flex items-center px-3 py-1.5 border rounded-lg text-sm font-medium ${
+                                request.status !== "confirmed"
+                                  ? "border-gray-300 text-gray-400 bg-gray-50 cursor-not-allowed"
+                                  : "border-indigo-300 text-indigo-700 bg-indigo-50 hover:bg-indigo-100"
+                              } transition-colors`}
                             >
-                              Details
+                              {request.status !== "confirmed" ? "Awaiting Confirmation" : "Trigger Payout"}
                             </button>
-
-                            {request.fiat_disbursement_status === "pending" && (
-                              <button
-                                onClick={() => openRequestDetails(request)}
-                                disabled={request.status !== "confirmed"}
-                                className={`inline-flex items-center px-3 py-1.5 border rounded-lg text-sm font-medium ${
-                                  request.status !== "confirmed"
-                                    ? "border-gray-300 text-gray-400 bg-gray-50 cursor-not-allowed"
-                                    : "border-indigo-300 text-indigo-700 bg-indigo-50 hover:bg-indigo-100"
-                                } transition-colors`}
-                              >
-                                {request.status !== "confirmed" ? "Payout Disabled" : "Trigger Payout"}
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
+                          )}
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-
-        {/* Card View */}
-        {activeView === "cards" && (
-          <div>
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-                    <div className="animate-pulse space-y-4">
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                      <div className="h-20 bg-gray-200 rounded"></div>
-                      <div className="h-10 bg-gray-200 rounded"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : filteredRequests.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10 text-gray-400 mb-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <h3 className="text-lg font-medium">No requests found</h3>
-                <p className="text-gray-500 mt-1">
-                  {requests.length > 0
-                    ? "Try adjusting your search or filter criteria"
-                    : "No offramp requests available at the moment"}
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredRequests.map((request) => (
-                  <div key={request.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium text-gray-900">{request.user_name}</h3>
-                          <p className="text-sm text-gray-500">{request.user_email}</p>
-                        </div>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                            request.status
-                          )}`}
-                        >
-                          {request.status === "confirmed" && (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-3.5 w-3.5 mr-1"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                          )}
-                          {request.status === "pending" && (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-3.5 w-3.5 mr-1"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                          )}
-                          {request.status === "failed" && (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-3.5 w-3.5 mr-1"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                          )}
-                          {request.status}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="px-4 py-3 space-y-4">
-                      <div className="flex flex-col space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-500">Token Amount</span>
-                          <span className="font-medium">
-                            {request.amount.toLocaleString()} {request.token}
-                          </span>
-                        </div>
-                        <div className="flex justify-center">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4 text-gray-400 rotate-90 md:rotate-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                            />
-                          </svg>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-500">Fiat Amount</span>
-                          <span className="font-medium">
-                            {request.fiat_amount.toLocaleString()} {request.fiat_currency}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="bg-gray-50 p-2 rounded-md">
-                          <p className="text-xs text-gray-500">Bank</p>
-                          <p className="font-medium truncate">{request.bank_name}</p>
-                        </div>
-                        <div className="bg-gray-50 p-2 rounded-md">
-                          <p className="text-xs text-gray-500">Account</p>
-                          <p className="font-medium truncate">{request.bank_account_number}</p>
-                        </div>
-                      </div>
-
-                      <div className="bg-gray-50 p-2 rounded-md">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs text-gray-500">Disbursement Status</p>
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                              request.fiat_disbursement_status
-                            )}`}
-                          >
-                            {request.fiat_disbursement_status === "disbursed" && (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-3.5 w-3.5 mr-1"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                            )}
-                            {request.fiat_disbursement_status === "pending" && (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-3.5 w-3.5 mr-1"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                            )}
-                            {request.fiat_disbursement_status === "failed" && (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-3.5 w-3.5 mr-1"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                            )}
-                            {request.fiat_disbursement_status}
-                          </span>
-                        </div>
-                        <p className="text-xs mt-1">{formatDate(request.disbursed_at)}</p>
-                      </div>
-                    </div>
-
-                    <div className="px-4 pb-4 pt-2 flex justify-between">
-                      <button
-                        onClick={() => openRequestDetails(request)}
-                        className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                      >
-                        View Details
-                      </button>
-
-                      {request.fiat_disbursement_status === "pending" && (
-                        <button
-                          onClick={() => openRequestDetails(request)}
-                          disabled={request.status !== "confirmed"}
-                          className={`inline-flex items-center px-3 py-1.5 border rounded-lg text-sm font-medium ${
-                            request.status !== "confirmed"
-                              ? "border-gray-300 text-gray-400 bg-gray-50 cursor-not-allowed"
-                              : "border-indigo-300 text-indigo-700 bg-indigo-50 hover:bg-indigo-100"
-                          } transition-colors`}
-                        >
-                          {request.status !== "confirmed" ? "Awaiting Confirmation" : "Trigger Payout"}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Request Details Dialog */}
@@ -1010,34 +993,38 @@ export default function AdminOfframpPage() {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={() => setIsDialogOpen(false)}></div>
+              <div className="absolute inset-0 bg-black/50 dark:bg-black/70" onClick={() => setIsDialogOpen(false)}></div>
             </div>
 
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
               &#8203;
             </span>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="inline-block align-bottom bg-white dark:bg-background/95 backdrop-blur-lg rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white dark:bg-transparent px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Request Details</h3>
-                    <p className="mt-1 text-sm text-gray-500">Complete information about this offramp request</p>
+                    <h3 className="text-lg leading-6 font-medium text-black dark:text-white">Request Details</h3>
+                    <p className="mt-1 text-sm text-black/70 dark:text-white/70">Complete information about this offramp request</p>
 
                     <div className="mt-4 space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500 mb-1">User</h4>
-                          <p className="font-medium">{selectedRequest.user_name}</p>
-                          <p className="text-sm">{selectedRequest.user_email}</p>
+                          <h4 className="text-sm font-medium text-black/60 dark:text-white/60 mb-1">User</h4>
+                          <p className="font-medium text-black dark:text-white">{selectedRequest.user_name}</p>
+                          <p className="text-sm text-black/70 dark:text-white/70">{selectedRequest.user_email}</p>
                         </div>
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500 mb-1">Status</h4>
+                          <h4 className="text-sm font-medium text-black/60 dark:text-white/60 mb-1">Status</h4>
                           <div className="flex flex-col gap-1.5">
                             <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                selectedRequest.status
-                              )}`}
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                selectedRequest.status === "confirmed"
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                  : selectedRequest.status === "pending"
+                                  ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                                  : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                              }`}
                             >
                               {selectedRequest.status === "confirmed" && (
                                 <svg
@@ -1058,9 +1045,13 @@ export default function AdminOfframpPage() {
                               {selectedRequest.status}
                             </span>
                             <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                selectedRequest.fiat_disbursement_status
-                              )}`}
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                selectedRequest.fiat_disbursement_status === "disbursed"
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                  : selectedRequest.fiat_disbursement_status === "pending"
+                                  ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                                  : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                              }`}
                             >
                               {selectedRequest.fiat_disbursement_status === "disbursed" && (
                                 <svg
@@ -1085,67 +1076,67 @@ export default function AdminOfframpPage() {
                       </div>
 
                       <div>
-                        <h4 className="text-sm font-medium text-gray-500 mb-1">Wallet Address</h4>
-                        <p className="text-sm font-mono break-all">{selectedRequest.user_wallet}</p>
+                        <h4 className="text-sm font-medium text-black/60 dark:text-white/60 mb-1">Wallet Address</h4>
+                        <p className="text-sm font-mono break-all text-black dark:text-white">{selectedRequest.user_wallet}</p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500 mb-1">Token Amount</h4>
-                          <p className="font-medium">
+                          <h4 className="text-sm font-medium text-black/60 dark:text-white/60 mb-1">Token Amount</h4>
+                          <p className="font-medium text-black dark:text-white">
                             {selectedRequest.amount.toLocaleString()} {selectedRequest.token}
                           </p>
                         </div>
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500 mb-1">Fiat Amount</h4>
-                          <p className="font-medium">
+                          <h4 className="text-sm font-medium text-black/60 dark:text-white/60 mb-1">Fiat Amount</h4>
+                          <p className="font-medium text-black dark:text-white">
                             {selectedRequest.fiat_amount.toLocaleString()} {selectedRequest.fiat_currency}
                           </p>
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="text-sm font-medium text-gray-500 mb-1">Bank Details</h4>
+                        <h4 className="text-sm font-medium text-black/60 dark:text-white/60 mb-1">Bank Details</h4>
                         <div className="grid grid-cols-2 gap-2">
-                          <div className="bg-gray-50 p-2 rounded-md">
-                            <p className="text-xs text-gray-500">Bank Name</p>
-                            <p className="font-medium">{selectedRequest.bank_name}</p>
+                          <div className="bg-black/5 dark:bg-white/5 p-2 rounded-md">
+                            <p className="text-xs text-black/60 dark:text-white/60">Bank Name</p>
+                            <p className="font-medium text-black dark:text-white">{selectedRequest.bank_name}</p>
                           </div>
-                          <div className="bg-gray-50 p-2 rounded-md">
-                            <p className="text-xs text-gray-500">Bank Code</p>
-                            <p className="font-medium">{selectedRequest.bank_code}</p>
+                          <div className="bg-black/5 dark:bg-white/5 p-2 rounded-md">
+                            <p className="text-xs text-black/60 dark:text-white/60">Bank Code</p>
+                            <p className="font-medium text-black dark:text-white">{selectedRequest.bank_code}</p>
                           </div>
                         </div>
-                        <div className="bg-gray-50 p-2 rounded-md mt-2">
-                          <p className="text-xs text-gray-500">Account Number</p>
-                          <p className="font-medium">{selectedRequest.bank_account_number}</p>
+                        <div className="bg-black/5 dark:bg-white/5 p-2 rounded-md mt-2">
+                          <p className="text-xs text-black/60 dark:text-white/60">Account Number</p>
+                          <p className="font-medium text-black dark:text-white">{selectedRequest.bank_account_number}</p>
                         </div>
                       </div>
 
                       {selectedRequest.payout_reference && (
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500 mb-1">Payout Reference</h4>
-                          <p className="text-sm font-mono">{selectedRequest.payout_reference}</p>
+                          <h4 className="text-sm font-medium text-black/60 dark:text-white/60 mb-1">Payout Reference</h4>
+                          <p className="text-sm font-mono text-black dark:text-white">{selectedRequest.payout_reference}</p>
                         </div>
                       )}
 
                       {selectedRequest.admin_note && (
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500 mb-1">Admin Note</h4>
-                          <p className="text-sm">{selectedRequest.admin_note}</p>
+                          <h4 className="text-sm font-medium text-black/60 dark:text-white/60 mb-1">Admin Note</h4>
+                          <p className="text-sm text-black dark:text-white">{selectedRequest.admin_note}</p>
                         </div>
                       )}
 
                       <div>
-                        <h4 className="text-sm font-medium text-gray-500 mb-1">Timestamps</h4>
+                        <h4 className="text-sm font-medium text-black/60 dark:text-white/60 mb-1">Timestamps</h4>
                         <div className="grid grid-cols-2 gap-2">
-                          <div className="bg-gray-50 p-2 rounded-md">
-                            <p className="text-xs text-gray-500">Created</p>
-                            <p className="text-sm">{new Date(selectedRequest.created_at).toLocaleString()}</p>
+                          <div className="bg-black/5 dark:bg-white/5 p-2 rounded-md">
+                            <p className="text-xs text-black/60 dark:text-white/60">Created</p>
+                            <p className="text-sm text-black dark:text-white">{new Date(selectedRequest.created_at).toLocaleString()}</p>
                           </div>
-                          <div className="bg-gray-50 p-2 rounded-md">
-                            <p className="text-xs text-gray-500">Disbursed</p>
-                            <p className="text-sm">
+                          <div className="bg-black/5 dark:bg-white/5 p-2 rounded-md">
+                            <p className="text-xs text-black/60 dark:text-white/60">Disbursed</p>
+                            <p className="text-sm text-black dark:text-white">
                               {selectedRequest.disbursed_at
                                 ? new Date(selectedRequest.disbursed_at).toLocaleString()
                                 : "Not yet"}
@@ -1157,16 +1148,16 @@ export default function AdminOfframpPage() {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+              <div className="bg-black/5 dark:bg-white/5 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 {selectedRequest.fiat_disbursement_status === "pending" && (
                   <button
                     type="button"
                     onClick={() => handleTriggerPayout(selectedRequest.id)}
                     disabled={selectedRequest.status !== "confirmed" || loading}
-                    className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white sm:ml-3 sm:w-auto sm:text-sm ${
+                    className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium sm:ml-3 sm:w-auto sm:text-sm ${
                       selectedRequest.status !== "confirmed" || loading
-                        ? "bg-indigo-300 cursor-not-allowed"
-                        : "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        ? "bg-[#7b77b9]/50 text-white/70 cursor-not-allowed"
+                        : "bg-[#7b77b9] text-white hover:bg-[#7b77b9]/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7b77b9]"
                     }`}
                   >
                     {loading ? (
@@ -1201,7 +1192,7 @@ export default function AdminOfframpPage() {
                 <button
                   type="button"
                   onClick={() => setIsDialogOpen(false)}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-black/20 dark:border-white/20 shadow-sm px-4 py-2 bg-white dark:bg-background text-base font-medium text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7b77b9] sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   Close
                 </button>
@@ -1210,6 +1201,6 @@ export default function AdminOfframpPage() {
           </div>
         </div>
       )}
-    </div>
+    </Layout>
   )
 }

@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
+import { NextRequest } from 'next/server';
 
 // Initialize services only when function is called
 const getResend = () => {
@@ -29,6 +30,98 @@ const getSupabase = () => {
 
   return createClient(supabaseUrl, supabaseKey);
 };
+
+// Initialize Supabase client
+const supabaseUrlService = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+const supabaseService = createClient(supabaseUrlService, supabaseServiceKey);
+
+// GET: Fetch waitlist entries with optional filters
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const status = searchParams.get('status');
+    const search = searchParams.get('search');
+    const sort = searchParams.get('sort') || 'created_at';
+    const order = searchParams.get('order') || 'desc';
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    
+    // Start building the query
+    let query = supabaseService
+      .from('waitlist')
+      .select('*');
+    
+    // Add filters if they exist
+    if (status && status !== 'all') {
+      query = query.eq('status', status);
+    }
+    
+    if (search) {
+      query = query.or(`email.ilike.%${search}%,name.ilike.%${search}%,wallet.ilike.%${search}%`);
+    }
+    
+    // Get the total count before pagination
+    const { count: totalCount } = await supabaseService
+      .from('waitlist')
+      .select('*', { count: 'exact', head: true });
+    
+    // Apply sorting and pagination
+    const { data, error } = await query
+      .order(sort, { ascending: order === 'asc' })
+      .range((page - 1) * limit, page * limit - 1);
+    
+    if (error) {
+      console.error('Error fetching waitlist data:', error);
+      return NextResponse.json({ error: 'Failed to fetch waitlist data' }, { status: 500 });
+    }
+    
+    return NextResponse.json({ 
+      data, 
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+        pages: Math.ceil((totalCount || 0) / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
+  }
+}
+
+// PATCH: Update waitlist entry status
+export async function PATCH(request: NextRequest) {
+  try {
+    const { ids, status } = await request.json();
+    
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json({ error: 'Invalid or missing ids' }, { status: 400 });
+    }
+    
+    if (!status || !['pending', 'confirmed'].includes(status)) {
+      return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
+    }
+    
+    const { data, error } = await supabaseService
+      .from('waitlist')
+      .update({ status })
+      .in('id', ids)
+      .select();
+    
+    if (error) {
+      console.error('Error updating waitlist entries:', error);
+      return NextResponse.json({ error: 'Failed to update waitlist entries' }, { status: 500 });
+    }
+    
+    return NextResponse.json({ data, success: true });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   try {

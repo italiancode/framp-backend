@@ -74,7 +74,7 @@ export default function Homepage() {
                 >
                   <Link href="/about">Learn More</Link>
                 </Button>
-              </div>
+          </div>
             </motion.div>
 
             <motion.div
@@ -234,7 +234,7 @@ export default function Homepage() {
             </div>
           </motion.div>
         </div>
-      </section>
+    </section>
     </Layout>
   );
 }

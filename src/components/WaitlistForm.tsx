@@ -58,7 +58,7 @@ export default function WaitlistForm() {
   return (
     <main className="min-h-[90vh] bg-white dark:bg-background/90 text-black dark:text-white overflow-hidden relative py-10 sm:py-16">
       <BackgroundElements />
-      
+
       {/* Hero Section */}
       <section className="relative container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
@@ -89,17 +89,17 @@ export default function WaitlistForm() {
                 </p>
 
                 <div className="space-y-3 sm:space-y-4">
-                  <div className="relative">
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email address"
+                <div className="relative">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email address"
                       className="w-full px-4 py-3 bg-white dark:bg-black/30 border border-black/20 dark:border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7b77b9] focus:border-transparent text-black dark:text-white placeholder-black/50 dark:placeholder-white/50"
-                      required
-                    />
-                  </div>
-                  
+              required
+            />
+                </div>
+
                   <div className="relative">
                     <input
                       type="text"

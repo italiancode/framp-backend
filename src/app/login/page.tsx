@@ -11,9 +11,86 @@ import { GrGoogle } from 'react-icons/gr'
 import { HiDesktopComputer } from 'react-icons/hi'
 import { BackgroundElements } from '@/components/ui/BackgroundElements'
 import Layout from '@/components/layout/Layout'
+import { createBrowserClient } from '@supabase/ssr'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword ] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get('redirect') || '/dashboard'
+  
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+  
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setIsLoading(true)
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      
+      if (error) {
+        throw error
+      }
+      
+      // Check if user is an admin when trying to access admin routes
+      if (redirectPath.startsWith('/admin')) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single()
+          
+        if (profileError || !profileData || profileData.role !== 'admin') {
+          setError('You do not have permission to access the admin area')
+          await supabase.auth.signOut()
+          setIsLoading(false)
+          return
+        }
+      }
+      
+      // Successful login, redirect
+      router.push(redirectPath)
+      router.refresh()
+    } catch (error: any) {
+      setError(error.message || 'Failed to sign in')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  
+  const handleGoogleSignIn = async () => {
+    setError(null)
+    setIsLoading(true)
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?redirect=${redirectPath}`
+        }
+      })
+      
+      if (error) {
+        throw error
+      }
+    } catch (error: any) {
+      setError(error.message || 'Failed to sign in with Google')
+      setIsLoading(false)
+    }
+  }
   
   return (
     <Layout>
@@ -28,12 +105,21 @@ export default function LoginPage() {
                 Welcome back to Framp
               </p>
 
-              <div className="space-y-4">
+              {error && (
+                <div className="mb-4 p-3 border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800 text-red-700 dark:text-red-300 rounded-md text-sm">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="flex items-center bg-white dark:bg-black/30 text-black/70 dark:text-white/70 gap-2 border border-black/20 dark:border-white/20 px-3 py-1 rounded-md">
                   <Mail className='w-[18px] h-[21px]' />
                   <Input
-                    type='email'
+                  type='email'
                     placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                     className="flex-1 border-none outline-none focus-visible:!ring-0 bg-transparent text-black dark:text-white placeholder-black/50 dark:placeholder-white/50"
                   />
                 </div>
@@ -43,10 +129,13 @@ export default function LoginPage() {
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
                     className="flex-1 border-none outline-none focus-visible:!ring-0 bg-transparent text-black dark:text-white placeholder-black/50 dark:placeholder-white/50"
                   />
-                  <button onClick={() => setShowPassword(!showPassword)}> 
-                    { showPassword ? <Eye className='w-[18px] h-[21px] text-black dark:text-white' /> : <FaEyeSlash className='w-[18px] h-[21px] text-black dark:text-white' /> }
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}> 
+                    {showPassword ? <Eye className='w-[18px] h-[21px] text-black dark:text-white' /> : <FaEyeSlash className='w-[18px] h-[21px] text-black dark:text-white' />}
                   </button>
                 </div>
 
@@ -54,23 +143,31 @@ export default function LoginPage() {
                   <a href="#" className="text-sm text-[#7b77b9] hover:underline">Forgot password?</a>
                 </div>
 
-                <Button className='w-full !py-6 bg-[#7b77b9] hover:bg-[#7b77b9]/90 text-white font-medium'>
-                  Sign In
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className='w-full !py-6 bg-[#7b77b9] hover:bg-[#7b77b9]/90 text-white font-medium'
+                >
+                  {isLoading ? 'Signing In...' : 'Sign In'}
                 </Button>
+              </form>
                 
-                <Button className='w-full !py-6 bg-white dark:bg-black/30 border border-black/20 dark:border-white/20 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 font-medium flex items-center justify-center gap-2'>
-                  <Image src="/images/google.svg" alt="Google" width={20} height={20} />
-                  Sign in with Google
-                </Button>
-                
-                <p className="text-center text-sm text-black/60 dark:text-white/60 mt-4">
-                  Don't have an account? <a href="/waitlist" className="text-[#7b77b9] hover:underline">Join Waitlist</a>
-                </p>
-              </div>
+              <Button 
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+                className='w-full !py-6 mt-4 bg-white dark:bg-black/30 border border-black/20 dark:border-white/20 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 font-medium flex items-center justify-center gap-2'
+              >
+                <Image src="/images/google.svg" alt="Google" width={20} height={20} />
+                Sign in with Google
+              </Button>
+              
+              <p className="text-center text-sm text-black/60 dark:text-white/60 mt-4">
+                Don't have an account? <a href="/waitlist" className="text-[#7b77b9] hover:underline">Join Waitlist</a>
+              </p>
             </div>
           </div>
         </div>
-      </section>
+    </section>
     </Layout>
   )
 }
