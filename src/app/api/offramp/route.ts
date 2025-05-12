@@ -2,12 +2,29 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 // Initialize Supabase client with environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
+
+// Check if required environment variables are available
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error("Missing required environment variables for Supabase");
+}
+
+// Create Supabase client only if environment variables are available
+const supabase = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 export async function GET(request: Request) {
   try {
+    // Verify Supabase client is initialized
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Supabase client not initialized. Check server configuration." },
+        { status: 500 }
+      );
+    }
+    
     const { searchParams } = new URL(request.url);
     
     // Extract query parameters
@@ -77,6 +94,14 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    // Verify Supabase client is initialized
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Supabase client not initialized. Check server configuration." },
+        { status: 500 }
+      );
+    }
+    
     const body = await request.json();
     const { ids, status } = body;
     

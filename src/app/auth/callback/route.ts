@@ -8,20 +8,23 @@ export async function GET(request: NextRequest) {
   const redirect = requestUrl.searchParams.get('redirect') || '/dashboard'
   
   if (code) {
-    const cookieStore = cookies()
-    
+    // Create Supabase client
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
+          async get(name: string) {
+            const cookieStore = await cookies()
+            const cookie = cookieStore.get(name)
+            return cookie?.value
           },
-          set(name: string, value: string, options: any) {
+          async set(name: string, value: string, options: any) {
+            const cookieStore = await cookies()
             cookieStore.set({ name, value, ...options })
           },
-          remove(name: string, options: any) {
+          async remove(name: string, options: any) {
+            const cookieStore = await cookies()
             cookieStore.set({ name, value: '', ...options })
           },
         },

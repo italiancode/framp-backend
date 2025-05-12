@@ -31,15 +31,31 @@ const getSupabase = () => {
   return createClient(supabaseUrl, supabaseKey);
 };
 
-// Initialize Supabase client
-const supabaseUrlService = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+// Initialize Supabase client with service role
+const supabaseUrlService = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
 
-const supabaseService = createClient(supabaseUrlService, supabaseServiceKey);
+// Check if required environment variables are available
+if (!supabaseUrlService || !supabaseServiceKey) {
+  console.error("Missing required environment variables for Supabase service client");
+}
+
+// Create Supabase service client only if environment variables are available
+const supabaseService = supabaseUrlService && supabaseServiceKey 
+  ? createClient(supabaseUrlService, supabaseServiceKey)
+  : null;
 
 // GET: Fetch waitlist entries with optional filters
 export async function GET(request: NextRequest) {
   try {
+    // Verify Supabase service client is initialized
+    if (!supabaseService) {
+      return NextResponse.json(
+        { error: "Supabase service client not initialized. Check server configuration." },
+        { status: 500 }
+      );
+    }
+    
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status');
     const search = searchParams.get('search');
@@ -95,6 +111,14 @@ export async function GET(request: NextRequest) {
 // PATCH: Update waitlist entry status
 export async function PATCH(request: NextRequest) {
   try {
+    // Verify Supabase service client is initialized
+    if (!supabaseService) {
+      return NextResponse.json(
+        { error: "Supabase service client not initialized. Check server configuration." },
+        { status: 500 }
+      );
+    }
+    
     const { ids, status } = await request.json();
     
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
