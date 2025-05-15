@@ -26,8 +26,12 @@ export async function GET(request: NextRequest) {
     
     // Get cookies to check
     const cookies: Record<string, string> = {};
-    for (const [name, value] of request.cookies.entries()) {
-      cookies[name] = value.value;
+    const cookieStore = request.cookies;
+    
+    // In Next.js 13+, we need to use getAll() instead of entries()
+    const cookieList = cookieStore.getAll();
+    for (const cookie of cookieList) {
+      cookies[cookie.name] = cookie.value;
     }
     
     // Attempt to manually create a session from cookies
