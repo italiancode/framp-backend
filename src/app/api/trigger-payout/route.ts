@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
         .update({
           fiat_disbursement_status: "success",
           disbursed_at: new Date().toISOString(),
-          payout_reference: transfer.reference,
+          payout_reference: transfer.data?.reference,
         })
         .eq("id", request_id);
     } else {
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Transfer failed. Please check Flutterwave response." }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, reference: transfer.reference });
+    return NextResponse.json({ success: true, reference: transfer.data?.reference });
   } catch (e: any) {
     // Catch any unexpected error and update the request status
     await supabase
