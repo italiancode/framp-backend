@@ -2,138 +2,164 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Mail, Lock } from "lucide-react";
+import { createBrowserClient } from '@supabase/ssr'
 
 export default function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [debug, setDebug] = useState<string | null>(null);
   
   const router = useRouter();
-  const { signup, error, clearError } = useAuth();
+  
+  // Create supabase browser client directly for better control
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
-    clearError();
+    setIsSubmitting(true);
+    setDebug("Starting signup process...");
 
     // Minimal validation
     if (!email || !email.includes("@")) {
       setFormError("Please enter a valid email address");
+      setIsSubmitting(false);
       return;
     }
 
     // Simple password check
     if (password.length < 6) {
       setFormError("Password must be at least 6 characters");
+      setIsSubmitting(false);
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      // We'll just use email and password for signup - profile details can be added later
-      await signup(email, password);
-      router.push("/dashboard"); // Redirect to dashboard after successful signup
+      setDebug("Starting signup process for: " + email);
+      
+      // Direct API call to signup endpoint for better control
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Signup failed');
+      }
+      
+      setDebug("Signup successful, now signing in");
+      
+      // Sign in the user immediately after signup
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (signInError) {
+        console.error("Error signing in after registration:", signInError);
+        setDebug("Error signing in: " + signInError.message);
+        throw new Error('Account created but login failed. Please go to the login page.');
+      }
+      
+      setDebug("Login successful, redirecting to dashboard");
+      
+      // Use window.location for a full page refresh to ensure state is reset
+      window.location.href = "/dashboard";
     } catch (err: any) {
+      console.error("Signup error:", err);
       setFormError(err.message || "Failed to create account. Please try again.");
+      setDebug("Error: " + err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="bg-gray-900/60 backdrop-blur-md p-8 rounded-2xl border border-gray-800 shadow-xl max-w-md w-full mx-auto">
-      <h2 className="text-2xl font-bold text-white mb-2">Get Started</h2>
-      <p className="text-gray-400 text-sm mb-6">Create your account with just email and password. You can complete your profile later.</p>
-      
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Email Input */}
-        <div>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 bg-gray-800/70 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
-            placeholder="Your email address"
-            required
-          />
+    <div className="w-full max-w-md mx-auto">
+      <div className="bg-white/50 dark:bg-background/50 backdrop-blur-md p-8 rounded-2xl border border-black/10 dark:border-white/10 shadow-xl">
+        <div className="flex justify-center mb-6">
+          <img src="/frampapplogo.webp" alt="FRAMP Logo" className="h-12 w-auto" />
         </div>
-
-        {/* Password Input */}
-        <div>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 bg-gray-800/70 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
-            placeholder="Create a password"
-            required
-          />
-        </div>
-
-        {/* Error display */}
-        {(formError || error) && (
-          <div className="text-red-400 text-sm">
-            {formError || error}
+        
+        <h1 className="text-3xl font-bold text-center text-black dark:text-white mb-2">Sign Up</h1>
+        <p className="text-center text-black/60 dark:text-white/60 mb-6">
+          Create your account to get started
+        </p>
+        
+        {formError && (
+          <div className="mb-4 p-3 border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800 text-red-700 dark:text-red-300 rounded-md text-sm">
+            {formError}
           </div>
         )}
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex items-center bg-white dark:bg-black/30 text-black/70 dark:text-white/70 gap-2 border border-black/20 dark:border-white/20 px-3 py-1 rounded-md">
+            <Mail className="w-[18px] h-[21px]" />
+          <input
+            type="email"
+              placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+              className="flex-1 border-none outline-none focus-visible:!ring-0 bg-transparent text-black dark:text-white placeholder-black/50 dark:placeholder-white/50 p-2"
+          />
+        </div>
 
-        {/* Submit Button */}
+          <div className="flex items-center bg-white dark:bg-black/30 text-black/70 dark:text-white/70 gap-2 border border-black/20 dark:border-white/20 px-3 py-1 rounded-md">
+            <Lock className="w-[18px] h-[21px]" />
+          <input
+            type="password"
+              placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+              className="flex-1 border-none outline-none focus-visible:!ring-0 bg-transparent text-black dark:text-white placeholder-black/50 dark:placeholder-white/50 p-2"
+          />
+        </div>
+
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-all duration-300 ${
-            isSubmitting
-              ? "bg-purple-700 cursor-wait"
-              : "bg-gradient-to-r from-purple-600 to-violet-500 hover:opacity-90"
-          }`}
+            className="w-full !py-3 bg-[#7b77b9] hover:bg-[#7b77b9]/90 text-white font-medium flex items-center justify-center gap-2 rounded-md"
         >
           {isSubmitting ? (
-            <span className="flex items-center">
-              <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               Creating Account...
             </span>
           ) : (
-            <span className="flex items-center">
-              Create Account <ArrowRight className="ml-2 h-4 w-4" />
+              <span className="flex items-center gap-2">
+                Create Account <ArrowRight size={18} />
             </span>
           )}
         </button>
+        </form>
 
-        <div className="text-center mt-6">
-          <p className="text-gray-400">
-            Already have an account?{" "}
-            <Link href="/login" className="text-purple-400 hover:text-purple-300">
-              Sign in
-            </Link>
-          </p>
+        <p className="text-center text-sm text-black/60 dark:text-white/60 mt-4">
+          Already have an account? <Link href="/login" className="text-[#7b77b9] hover:underline">Sign in</Link>
+        </p>
+        
+        {debug && (
+          <div className="mt-6 p-3 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg overflow-auto max-h-48">
+            <p className="text-xs text-black/70 dark:text-white/70 font-mono whitespace-pre-wrap">{debug}</p>
+          </div>
+        )}
         </div>
-      </form>
     </div>
   );
 } 

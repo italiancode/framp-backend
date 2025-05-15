@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, name, wallet_address } = await request.json();
 
     // Validate input
     if (!email || !password) {
@@ -34,14 +34,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Store minimal user profile information in Supabase
+    // 1. Create entry in profiles table with default role 'user'
     const { error: profileError } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .insert([
         {
-          user_id: authData.user.id,
+          id: authData.user.id,
           email: email,
+          role: 'user', // Default role
           created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
       ]);
 
@@ -51,6 +53,34 @@ export async function POST(request: NextRequest) {
       await supabase.auth.admin.deleteUser(authData.user.id);
       return NextResponse.json(
         { error: 'Failed to create user profile' },
+        { status: 500 }
+      );
+    }
+
+    // 2. Create entry in users table
+    const { error: userError } = await supabase
+      .from('users')
+      .insert([
+        {
+          id: authData.user.id,
+          name: name || null,
+          email: email,
+          wallet: wallet_address || null,
+          status: 'active',
+          ip_address: request.headers.get('x-forwarded-for') || null,
+          user_agent: request.headers.get('user-agent') || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ]);
+
+    if (userError) {
+      console.error('Error creating user record:', userError);
+      // If user creation fails, delete the auth user and profile to avoid orphaned records
+      await supabase.auth.admin.deleteUser(authData.user.id);
+      await supabase.from('profiles').delete().eq('id', authData.user.id);
+      return NextResponse.json(
+        { error: 'Failed to create user record' },
         { status: 500 }
       );
     }

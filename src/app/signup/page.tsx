@@ -1,45 +1,51 @@
 import { Metadata } from "next";
 import SignupForm from "@/components/auth/SignupForm";
+import { Suspense } from "react";
+import { BackgroundElements } from '@/components/ui/BackgroundElements';
+import Layout from '@/components/layout/Layout';
 
 export const metadata: Metadata = {
   title: "Sign Up | FRAMP",
   description: "Create a FRAMP account to start using our services and manage your finances on Solana.",
 };
 
+// Loading fallback for suspense
+function LoadingForm() {
+  return (
+    <div className="bg-white/50 dark:bg-background/50 backdrop-blur-md p-8 rounded-2xl border border-black/10 dark:border-white/10 shadow-xl max-w-md w-full mx-auto">
+      <div className="animate-pulse space-y-4">
+        <div className="flex justify-center mb-6">
+          <div className="h-12 w-32 bg-black/5 dark:bg-white/5 rounded"></div>
+        </div>
+        <div className="h-8 bg-black/5 dark:bg-white/5 rounded w-3/4 mx-auto"></div>
+        <div className="h-4 bg-black/5 dark:bg-white/5 rounded w-2/3 mx-auto"></div>
+        <div className="h-12 bg-black/5 dark:bg-white/5 rounded"></div>
+        <div className="h-12 bg-black/5 dark:bg-white/5 rounded"></div>
+        <div className="h-12 bg-black/5 dark:bg-white/5 rounded"></div>
+        <div className="h-4 bg-black/5 dark:bg-white/5 rounded w-2/3 mx-auto"></div>
+      </div>
+    </div>
+  );
+}
+
 export default function SignupPage() {
   return (
-    <main className="min-h-screen bg-black text-white overflow-hidden relative">
-      {/* Background gradients */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-[-20%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-[30%] h-[30%] bg-purple-500/20 rounded-full blur-[100px]" />
-        <div className="absolute top-[30%] left-[10%] w-[25%] h-[25%] bg-violet-700/10 rounded-full blur-[80px]" />
-      </div>
+    <Layout>
+      <main className="min-h-screen bg-white dark:bg-background relative">
+        <BackgroundElements />
 
-      {/* Header with Logo */}
-      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-5">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2">
-            <div className="h-10 flex items-center">
-              <img
-                src="/frampapplogo.webp"
-                alt="FRAMP Logo"
-                className="h-8 w-auto"
-              />
-            </div>
+        {/* Content */}
+        <div className="container relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 flex items-center justify-center min-h-[90vh]">
+          <div className="w-full max-w-md">
+            <h1 className="text-3xl font-bold text-center mb-8 text-black dark:text-white">
+              Join <span className="text-[#7b77b9]">FRAMP</span> Today
+            </h1>
+            <Suspense fallback={<LoadingForm />}>
+              <SignupForm />
+            </Suspense>
           </div>
         </div>
-      </header>
-
-      {/* Content */}
-      <div className="container mx-auto px-4 pt-32 pb-20 flex flex-col items-center justify-center min-h-screen">
-        <div className="w-full max-w-md">
-          <h1 className="text-3xl md:text-4xl font-bold text-center mb-8">
-            Join <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-violet-500">FRAMP</span> Today
-          </h1>
-          <SignupForm />
-        </div>
-      </div>
-    </main>
+      </main>
+    </Layout>
   );
 } 

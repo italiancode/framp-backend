@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { WalletContextProvider } from "@/contexts/WalletContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Geist, Geist_Mono } from "next/font/google";
 
@@ -55,7 +56,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            {children}
+            <WalletContextProvider>
+              {children}
+            </WalletContextProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

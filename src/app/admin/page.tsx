@@ -44,6 +44,7 @@ export default function AdminDashboard() {
   const [selectedEntries, setSelectedEntries] = useState<string[]>([]);
   const [activeView, setActiveView] = useState<string>("table");
   const [filterMenuOpen, setFilterMenuOpen] = useState<boolean>(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     // Fetch waitlist data directly from Supabase
@@ -195,6 +196,25 @@ export default function AdminDashboard() {
     // Could add a toast notification here
   };
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
+      
+      // Force a full page refresh when logging out
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="relative min-h-screen bg-white dark:bg-background py-6 px-4 sm:px-6 lg:px-8">
@@ -223,6 +243,13 @@ export default function AdminDashboard() {
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-background/50 backdrop-blur-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
               >
                 Off-Ramp Management
+              </button>
+              <button
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+              >
+                {isLoggingOut ? 'Logging out...' : 'Log out'}
               </button>
             </div>
           </div>
@@ -346,7 +373,7 @@ export default function AdminDashboard() {
                 <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
               </button>
               <button
-                onClick={exportToCSV}
+                  onClick={exportToCSV}
                 className="md:hidden flex items-center p-2 rounded-lg border border-black/20 dark:border-white/20 bg-white dark:bg-black/30 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5"
               >
                 <Download size={16} />
