@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { ArrowLeft, ArrowRight, Shield, Coins, PlusCircle, Bank } from "lucide-react";
+import { ArrowLeft, ArrowRight, Shield, Coins, PlusCircle, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { perenaClient } from "@/lib/perena/client";
 import USDStarWallet from "../../wallet/usdstar";
@@ -88,7 +88,7 @@ export default function PerenaOffRampPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Bank className="w-5 h-5 text-[#7b77b9] mt-0.5" />
+                  <Building className="w-5 h-5 text-[#7b77b9] mt-0.5" />
                   <div>
                     <h3 className="font-medium text-black dark:text-white">Fiat Conversion</h3>
                     <p className="text-sm text-black/70 dark:text-white/70">
