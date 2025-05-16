@@ -6,6 +6,7 @@ export interface OnRampParams {
   userWallet: string;
   paymentMethod: string;
   email: string;
+  feePercentage?: number; // Optional fee percentage
 }
 
 export interface OffRampParams {
@@ -15,6 +16,7 @@ export interface OffRampParams {
   bankCode: string;
   currency: string;
   email: string;
+  feePercentage?: number; // Optional fee percentage
 }
 
 /**
@@ -28,6 +30,7 @@ export async function processOnRamp({
   userWallet,
   paymentMethod,
   email,
+  feePercentage = 1, // Default to 1% if not provided
 }: OnRampParams) {
   try {
     // Step 1: Record the on-ramp request in your database
@@ -36,6 +39,7 @@ export async function processOnRamp({
       wallet: userWallet,
       paymentMethod,
       email,
+      feePercentage,
       status: 'pending'
     });
 
@@ -44,7 +48,7 @@ export async function processOnRamp({
 
     // Step 3: Calculate USD* amount (applying exchange rate and fees)
     const exchangeRate = await getUSDStarExchangeRate('USD'); 
-    const usdStarAmount = amount * exchangeRate * 0.99; // 1% fee example
+    const usdStarAmount = amount * exchangeRate * (1 - feePercentage / 100);
 
     // Step 4: Mint USD* to the user's wallet
     const mintResult = await mintUSDStar(userWallet, usdStarAmount, 'USDC');
@@ -57,7 +61,8 @@ export async function processOnRamp({
       txId: mintResult.txId,
       amount: usdStarAmount,
       fiatAmount: amount,
-      fee: amount * 0.01, // 1% fee example
+      fee: amount * (feePercentage / 100),
+      feePercentage,
     };
   } catch (error) {
     console.error('On-ramp process failed:', error);
@@ -78,6 +83,7 @@ export async function processOffRamp({
   bankCode,
   currency,
   email,
+  feePercentage = 1, // Default to 1% if not provided
 }: OffRampParams) {
   try {
     // Step 1: Record the off-ramp request
@@ -88,12 +94,13 @@ export async function processOffRamp({
       bankCode,
       currency,
       email,
+      feePercentage,
       status: 'pending'
     });
 
     // Step 2: Calculate fiat amount (applying exchange rate and fees)
     const exchangeRate = await getUSDStarExchangeRate(currency);
-    const fiatAmount = amount / exchangeRate * 0.99; // 1% fee example
+    const fiatAmount = amount / exchangeRate * (1 - feePercentage / 100);
 
     // Step 3: Redeem USD* from the user's wallet
     // In production, this should be a secure server-side operation
@@ -113,16 +120,17 @@ export async function processOffRamp({
       offRampRecord.id, 
       'processing', 
       redeemResult.txId,
-      transferResult.reference
+      transferResult.data?.reference
     );
 
     return {
       success: true,
       usdStarTxId: redeemResult.txId,
-      transferReference: transferResult.reference,
+      transferReference: transferResult.data?.reference,
       usdStarAmount: amount,
       fiatAmount,
-      fee: amount * 0.01 / exchangeRate, // 1% fee example
+      fee: amount * (feePercentage / 100) / exchangeRate,
+      feePercentage,
     };
   } catch (error) {
     console.error('Off-ramp process failed:', error);

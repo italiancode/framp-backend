@@ -42,9 +42,13 @@ const WalletContext = createContext<WalletContextState>({
 export const useWalletContext = () => useContext(WalletContext);
 
 export const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  // You can also provide a custom RPC endpoint
+  // Use custom Helius RPC URL from environment if available
   const network = WalletAdapterNetwork.Mainnet;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const endpoint = useMemo(() => {
+    return process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl(network);
+  }, [network]);
+
+  console.log(`Using Solana RPC URL: ${endpoint ? 'Custom URL configured' : 'Default Solana RPC'}`);
 
   // @solana/wallet-adapter-wallets includes all the adapters but supports tree shaking and lazy loading
   const wallets = useMemo(
@@ -77,10 +81,12 @@ const WalletContextContent: FC<{ children: ReactNode }> = ({ children }) => {
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const { user, refreshUser } = useAuth();
 
-  const connection = useMemo(
-    () => new Connection(clusterApiUrl(WalletAdapterNetwork.Mainnet)),
-    []
-  );
+  // Use custom Helius RPC URL from environment if available
+  const connection = useMemo(() => {
+    const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl(WalletAdapterNetwork.Mainnet);
+    console.log(`Creating Solana connection with URL: ${rpcUrl ? 'Custom URL' : 'Default URL'}`);
+    return new Connection(rpcUrl);
+  }, []);
 
   // Function to fetch wallet balance
   const fetchBalance = useCallback(async (publicKey: PublicKey) => {

@@ -16,7 +16,7 @@ import {
   Wallet,
   ExternalLink,
 } from "lucide-react";
-import USDStarWallet from "./usdstar";
+import StablesWallet from "./stables-wallet";
 
 export default function WalletPage() {
   const { publicKey, connected } = useWallet();
@@ -31,6 +31,15 @@ export default function WalletPage() {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Log wallet connection status
+  useEffect(() => {
+    console.log("Wallet connection status:", {
+      connected,
+      publicKey: publicKey?.toString(),
+      userWalletInProfile: user?.profile?.wallet_address
+    });
+  }, [connected, publicKey, user]);
 
   // Connect wallet to user profile
   useEffect(() => {
@@ -192,7 +201,7 @@ export default function WalletPage() {
           <div className="lg:col-span-2">
             {connected && publicKey ? (
               <div className="space-y-8">
-                <USDStarWallet walletAddress={publicKey?.toString() || ""} />
+                <StablesWallet walletAddress={publicKey?.toString() || ""} />
                 <div className="bg-gray-900/60 backdrop-blur-md p-6 rounded-xl border border-gray-800 shadow-lg">
                   <h2 className="text-xl font-bold mb-6 text-purple-400">
                     Transaction History

@@ -6,7 +6,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { ArrowLeft, ArrowRight, Shield, Coins, PlusCircle, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { perenaClient } from "@/lib/perena/client";
-import USDStarWallet from "../../wallet/usdstar";
+import USDStarWallet from "../../ramp/usdstar";
 
 export default function PerenaOffRampPage() {
   const { publicKey } = useWallet();
