@@ -11,7 +11,7 @@ export interface StablecoinConfig {
 
 // Define supported stablecoins
 export const SUPPORTED_STABLECOINS: Record<string, StablecoinConfig> = {
-  USD_STAR: {
+  'USD*': {
     symbol: "USD*",
     name: "Perena USD*",
     tokenAddress: "BenJy1n3WTx9mTjEvy63e8Q1j4RqUc6E4VBMz3ir4Wo6", // USD* token address
@@ -248,7 +248,7 @@ export async function getExchangeRate(
       EUR: 0.922,
       GBP: 0.785,
     },
-    USD_STAR: {
+    'USD*': {
       USD: 1.005,
       NGN: 1500.4,
       EUR: 0.927,
