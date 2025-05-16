@@ -38,10 +38,10 @@ const defaultConfig: RampConfig = {
   supportedCountries: ['Nigeria', 'Ghana', 'Kenya', 'South Africa'],
   supportedFiatCurrencies: [
     { code: 'NGN', name: 'Nigerian Naira', symbol: '₦' },
-    { code: 'GHS', name: 'Ghanaian Cedi', symbol: '₵' },
-    { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh' },
-    { code: 'ZAR', name: 'South African Rand', symbol: 'R' },
-    { code: 'USD', name: 'US Dollar', symbol: '$' },
+    // { code: 'GHS', name: 'Ghanaian Cedi', symbol: '₵' },
+    // { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh' },
+    // { code: 'ZAR', name: 'South African Rand', symbol: 'R' },
+    // { code: 'USD', name: 'US Dollar', symbol: '$' },
   ],
   banksByCountry: {
     'Nigeria': [
@@ -64,22 +64,22 @@ const defaultConfig: RampConfig = {
       { code: '035', name: 'Wema Bank' },
       { code: '057', name: 'Zenith Bank' },
     ],
-    'Ghana': [
-      { code: 'GH001', name: 'GCB Bank' },
-      { code: 'GH002', name: 'Ecobank Ghana' },
-      { code: 'GH003', name: 'Cal Bank' },
-    ],
-    'Kenya': [
-      { code: 'KE001', name: 'Equity Bank' },
-      { code: 'KE002', name: 'KCB Bank' },
-      { code: 'KE003', name: 'Co-operative Bank' },
-    ],
-    'South Africa': [
-      { code: 'ZA001', name: 'Standard Bank' },
-      { code: 'ZA002', name: 'First National Bank' },
-      { code: 'ZA003', name: 'ABSA' },
-      { code: 'ZA004', name: 'Nedbank' },
-    ],
+    // 'Ghana': [
+    //   { code: 'GH001', name: 'GCB Bank' },
+    //   { code: 'GH002', name: 'Ecobank Ghana' },
+    //   { code: 'GH003', name: 'Cal Bank' },
+    // ],
+    // 'Kenya': [
+    //   { code: 'KE001', name: 'Equity Bank' },
+    //   { code: 'KE002', name: 'KCB Bank' },
+    //   { code: 'KE003', name: 'Co-operative Bank' },
+    // ],
+    // 'South Africa': [
+    //   { code: 'ZA001', name: 'Standard Bank' },
+    //   { code: 'ZA002', name: 'First National Bank' },
+    //   { code: 'ZA003', name: 'ABSA' },
+    //   { code: 'ZA004', name: 'Nedbank' },
+    // ],
   },
   poolWalletAddress: '6FiKgaDKo5Zrz2YcyuVo9rkgSU3MkFw6na9di4fGyqn',
   devMode: true,
