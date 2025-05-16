@@ -255,9 +255,9 @@ export default function StablesWallet({
         signedTransaction = 'mock-signed-transaction-' + Date.now();
         
         // In production, this would use real wallet signing:
-        // const txData = Transaction.from(Buffer.from(transaction, 'base64'));
-        // const signedTx = await wallet.signTransaction(txData);
-        // signedTransaction = Buffer.from(signedTx.serialize()).toString('base64');
+        const txData = Transaction.from(Buffer.from(transaction, 'base64'));
+        const signedTx = await wallet.signTransaction(txData);
+        signedTransaction = Buffer.from(signedTx.serialize()).toString('base64');
       } catch (signError) {
         console.error("Transaction signing error:", signError);
         throw new Error("Transaction was not signed. Please try again.");
