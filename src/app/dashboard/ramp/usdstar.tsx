@@ -56,29 +56,6 @@ export default function USDStarWallet({
     icon?: React.ReactNode;
   } | null>(null);
 
-  // Sample bank list - this would typically come from an API
-  const banks = [
-    { code: "044", name: "Access Bank" },
-    { code: "063", name: "Access Bank (Diamond)" },
-    { code: "050", name: "EcoBank" },
-    { code: "011", name: "First Bank of Nigeria" },
-    { code: "214", name: "First City Monument Bank" },
-    { code: "058", name: "Guaranty Trust Bank" },
-    { code: "030", name: "Heritage Bank" },
-    { code: "301", name: "Jaiz Bank" },
-    { code: "082", name: "Keystone Bank" },
-    { code: "526", name: "Parallex Bank" },
-    { code: "076", name: "Polaris Bank" },
-    { code: "221", name: "Stanbic IBTC Bank" },
-    { code: "068", name: "Standard Chartered Bank" },
-    { code: "232", name: "Sterling Bank" },
-    { code: "100", name: "Suntrust Bank" },
-    { code: "032", name: "Union Bank of Nigeria" },
-    { code: "033", name: "United Bank For Africa" },
-    { code: "215", name: "Unity Bank" },
-    { code: "035", name: "Wema Bank" },
-    { code: "057", name: "Zenith Bank" },
-  ];
 
   useEffect(() => {
     loadWalletData();
@@ -478,7 +455,7 @@ export default function USDStarWallet({
               {activeTab === "offramp" && (
                 <form onSubmit={handleOffRamp}>
                   <div className="space-y-3">
-                    <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 p-3 rounded-md text-sm flex items-start gap-2 mb-2">
+                    {/* <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 p-3 rounded-md text-sm flex items-start gap-2 mb-2">
                       <ShieldAlert className="h-4 w-4 mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="font-medium">
@@ -501,7 +478,7 @@ export default function USDStarWallet({
                           </span>
                         </p>
                       </div>
-                    </div>
+                    </div> */}
                     
                     <div>
                       <label

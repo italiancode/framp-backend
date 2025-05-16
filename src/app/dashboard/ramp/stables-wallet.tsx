@@ -501,7 +501,7 @@ export default function StablesWallet({
               {activeTab === "offramp" && (
                 <form onSubmit={handleOffRamp}>
                   <div className="space-y-3">
-                    <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 p-3 rounded-md text-sm flex items-start gap-2 mb-2">
+                    {/* <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 p-3 rounded-md text-sm flex items-start gap-2 mb-2">
                       <ShieldAlert className="h-4 w-4 mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="font-medium">
@@ -524,7 +524,7 @@ export default function StablesWallet({
                           </span>
                         </p>
                       </div>
-                    </div>
+                    </div> */}
                     
                     <div>
                       <label

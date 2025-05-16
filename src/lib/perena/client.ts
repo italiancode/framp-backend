@@ -31,7 +31,7 @@ export async function getUSDStarBalance(walletAddress: string): Promise<number> 
   console.log(`Starting getUSDStarBalance for wallet: ${walletAddress}`);
   
   // Set to true for development/testing, set to false in production
-  const DEV_MODE = true;
+  const DEV_MODE = false;
   if (DEV_MODE) {
     console.log('DEV MODE: Returning mock USD* balance of 100');
     return 100;
